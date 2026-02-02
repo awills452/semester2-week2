@@ -11,17 +11,23 @@ import sqlite3
 
 
 def customer_tickets(conn, customer_id):
-    """
-    Return a list of tuples:
-    (film_title, screen, price)
+    c = conn.cursor()
+    c.execute("""
+        SELECT f.title, s.screen, t.price
+        FROM films f
+        JOIN screenings s ON f.film_id = s.film_id
+        JOIN tickets t ON t.screening_id = s.screening_id
+        WHERE t.customer_id = ?
+        ORDER BY f.title
+    """, (customer_id,))
+    result = c.fetchall()
+    return result
 
-    Include only tickets purchased by the given customer_id.
-    Order results by film title alphabetically.
-    """
-    pass
 
 
 def screening_sales(conn):
+    
+
     """
     Return a list of tuples:
     (screening_id, film_title, tickets_sold)
