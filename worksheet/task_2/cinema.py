@@ -26,26 +26,37 @@ def customer_tickets(conn, customer_id):
 
 
 def screening_sales(conn):
-    
-
+    cursor = conn.cursor()   
+    query = """
+        SELECT 
+            s.screening_id, 
+            f.title, 
+            COUNT(t.ticket_id) AS tickets_sold
+        FROM screenings s
+        JOIN films f ON s.film_id = f.film_id
+        LEFT JOIN tickets t ON s.screening_id = t.screening_id
+        GROUP BY s.screening_id, f.title
+        ORDER BY tickets_sold DESC;
     """
-    Return a list of tuples:
-    (screening_id, film_title, tickets_sold)
-
-    Include all screenings, even if tickets_sold is 0.
-    Order results by tickets_sold descending.
-    """
-    pass
+    cursor.execute(query)
+    results = cursor.fetchall()
+    cursor.close() 
+    return results
 
 
 def top_customers_by_spend(conn, limit):
+   
+    query = """
+        SELECT 
+            c.customer_name,
+            SUM(t.price) AS total_spent
+        FROM customers c
+        JOIN tickets t ON c.customer_id = t.customer_id
+        GROUP BY c.customer_id, c.customer_name
+        ORDER BY total_spent DESC
+        LIMIT ?;
     """
-    Return a list of tuples:
-    (customer_name, total_spent)
-
-    total_spent is the sum of ticket prices per customer.
-    Only include customers who have bought at least one ticket.
-    Order by total_spent descending.
-    Limit the number of rows returned to `limit`.
-    """
-    pass
+    cursor = conn.execute(query, (limit,))
+    results = cursor.fetchall()
+    cursor.close()
+    return results
